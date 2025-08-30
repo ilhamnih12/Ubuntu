@@ -1,0 +1,35 @@
+name: Free RDP Ubuntu (LXDE 1H)
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Update & Install LXDE + Chrome
+      run: |
+        sudo apt update
+        sudo apt install -y lxde-core lxterminal lxappearance
+        sudo apt install -y wget gdebi-core
+
+        # Install Google Chrome
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo gdebi -n google-chrome-stable_current_amd64.deb
+
+        # Install Chrome Remote Desktop
+        wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
+        sudo gdebi -n chrome-remote-desktop_current_amd64.deb
+
+        # Buat user baru
+        sudo useradd -m -s /bin/bash github
+        sudo adduser github sudo
+        echo 'github:rdpuser' | sudo chpasswd
+
+        # Konfigurasi LXDE untuk CRD
+        echo "exec startlxde" > /home/github/.xsession
+        sudo service chrome-remote-desktop start
+
+    - name: Keep Alive (1h)
+      run: |
+        echo "🚀 RDP Aktif (max 1 jam)"
+        sleep 1h
