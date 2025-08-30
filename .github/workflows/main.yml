@@ -1,4 +1,4 @@
-name: Free RDP Ubuntu
+name: Free RDP Ubuntu (LXDE Auto CRD 1H)
 
 on: workflow_dispatch
 
@@ -6,10 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Install Xfce & Chrome Remote Desktop
+    - name: Update & Install LXDE + Chrome + CRD
       run: |
         sudo apt update
-        sudo apt install -y xfce4 xfce4-goodies
+        sudo apt install -y lxde-core lxterminal lxappearance
         sudo apt install -y wget gdebi-core
 
         # Install Google Chrome
@@ -20,17 +20,21 @@ jobs:
         wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
         sudo gdebi -n chrome-remote-desktop_current_amd64.deb
 
-        # Setup user
+        # Buat user baru
         sudo useradd -m -s /bin/bash github
         sudo adduser github sudo
-        echo 'github:1234' | sudo chpasswd
+        echo 'github:rdpuser' | sudo chpasswd
 
-        # Enable CRD
-        echo "exec /usr/bin/xfce4-session" > /home/github/.xsession
-        sudo service chrome-remote-desktop start
+        # Konfigurasi LXDE
+        echo "exec startlxde" > /home/github/.xsession
 
-    - name: Keep Alive
+        # Jalankan CRD langsung pakai tokenmu
+        DISPLAY= /opt/google/chrome-remote-desktop/start-host \
+          --code="4/0AVMBsJhX6LG0N5iy91uTa4g3x8FgZ5sSPLLS5nD09R_idrhwUr_ooyP5n3rdYXGtOPbirg" \
+          --redirect-url="https://remotedesktop.google.com/_/oauthredirect" \
+          --name=$(hostname)
+
+    - name: Keep Alive (1h)
       run: |
-        echo "RDP Aktif 🚀"
+        echo "🚀 RDP Aktif (max 1 jam)"
         sleep 1h
-        
